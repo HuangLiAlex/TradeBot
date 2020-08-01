@@ -13,7 +13,7 @@ collection = db["test"]
 collection.delete_many({})
 
 # Add a Document to collection
-doc_1 = {"_id":0, "name": "Alex", "age": 30}
+doc_1 = {"_id":0, "name": "Alex", "age": 29}
 doc_2 = {"_id":1, "name": "Tom", "age": 25}
 doc_3 = {"_id":2, "name": "Jerry", "age": 24}
 
