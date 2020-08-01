@@ -1,8 +1,14 @@
 from pymongo import MongoClient
+import json
 
+
+# Get URL to database
+with open('key.json', 'r') as json_file:
+    data = json.load(json_file)
+url = data.get('DB_URL')
 
 # Connect to Mongo
-client = MongoClient("mongodb+srv://huangli:huangli123456@tradebotcluster.czq2u.mongodb.net/test?retryWrites=true&w=majority")
+client = MongoClient(url)
 
 # Get the database you want to access
 db = client["test"]
@@ -37,5 +43,15 @@ collection.update_one({"_id":0}, {"$set": {"age": 31, "category": "human"}})
 result = collection.find_one({"_id":0})
 print('Find one data: ', result)
 
+doc_4 = {"date":"2017-12-19","open":3266.02,"close":3296.54,"high":3296.94,"low":3266.02,"volume":115140134.0,"code":"sh000001"}
+doc_5 = {"date":"2017-12-14","open":3302.93,"close":3292.44,"high":3309.53,"low":3282.57,"volume":120544235.0,"code":"sh000001"}
 
+# Insert one data
+collection.insert_one(doc_4)
+collection.insert_one(doc_5)
+# Find one data
+result = collection.find({"date":"2017-12-19"})
+print('Find all data: ')
+for keyvaluepair in result:
+    print(keyvaluepair)
 
