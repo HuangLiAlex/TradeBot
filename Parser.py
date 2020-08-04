@@ -8,6 +8,6 @@ def parseCNSTK(rawData):
     jsonObject = {}
     for i in range(len(jsonDataList)):
         line = jsonDataList[i]
-        jsonObject[i] = line
+        jsonObject[i] = json.loads(line)
 
     return json.loads(json.dumps(jsonObject))

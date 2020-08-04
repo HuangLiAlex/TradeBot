@@ -1,7 +1,6 @@
 from pymongo import MongoClient
 import json
 
-db = []
 
 # Add a Document to collection
 doc_1 = {"_id": 0, "name": "Alex", "age": 29}
@@ -13,78 +12,74 @@ doc_5 = {"date": "2017-12-14", "open": 3302.93, "close": 3292.44, "high": 3309.5
          "volume": 120544235.0, "code": "sh000001"}
 
 
-def connectDatabase(databaseName):
-    # Get URL to database
-    with open('key.json', 'r') as json_file:
-        data = json.load(json_file)
-    url = data.get('DB_URL')
+class DBManager:
+    def __init__(self):
+        self.client = self.initDB()
 
-    # Connect to MongoDB
-    client = MongoClient(url)
+    def initDB(self):
+        with open('key.json', 'r') as json_file:
+            data = json.load(json_file)
+        url = data.get('DB_URL')
 
-    # Get the database to access
-    return client[databaseName]
+        # Connect to MongoDB
+        return MongoClient(url)
 
+    def getDB(self, databaseName):
+        # Get the database to access
+        return self.client[databaseName]
 
+    """
+    # Input: a Json object contains several Json objects
+    # { 
+    #   {key:value, key:value, ...}, 
+    #   {key:value, key:value, ...}, 
+    #   ...
+    # }
+    #
+    # Output: boolean: True or False
+    """
+    def insert(self, jsonObject):
+        db = self.getDB("TradingData") # TBD: db name change to stock code. eg.SH000001
+        collection = db["SH000001"] # TBD: change collecton name to period. eg.daily, weekly, monthly
 
-"""
-# Input: a Json object contains several Json objects
-# { 
-#   {key:value, key:value, ...}, 
-#   {key:value, key:value, ...}, 
-#   ...
-# }
-#
-# Output: boolean: True or False
-"""
-def insert(jsonObject):
-    print(jsonObject)
-    # Check database connection
-    global db
-    if not db:
-        # db = connectDatabase("test")
-        db = connectDatabase("TradingData")
+        # [!!!DANGEROUS ACTION!!!]
+        # Delete all data for testing purpose
+        self.deleteCollection(collection)
 
-    collection = db["SH000001"]
-
-    # [!!!DANGEROUS ACTION!!!]
-    # Delete all data for testing purpose
-    # deleteCollection(collection)
-
-    # test insert one data
-    return collection.insert_one(doc_1)
+        # test insert one data
+        return collection.insert_one(doc_1)
 
 
-def find(collection):
-    # test find one data
-    return collection.find_one({"_id": 0})
+    def find(self, collection):
+        # test find one data
+        return collection.find_one({"_id": 0})
 
-# # Insert multiple data
-# collection.insert_many([doc_2, doc_3])
-# # Find all data
-# result = collection.find({})
-# print('Find all data: ')
-# for user in result:
-#     print(user)
-#
-# # Update data
-# collection.update_one({"_id":0}, {"$set": {"age": 31, "category": "human"}})
-# # Find one data
-# result = collection.find_one({"_id":0})
-# print('Find one data: ', result)
-#
-# # Insert one data
-# collection.insert_one(doc_4)
-# collection.insert_one(doc_5)
-# # Find one data
-# result = collection.find({"date":"2017-12-19"})
-# print('Find all data: ')
-# for keyValue in result:
-#     print(keyValue)
+    # # Insert multiple data
+    # collection.insert_many([doc_2, doc_3])
+    # # Find all data
+    # result = collection.find({})
+    # print('Find all data: ')
+    # for user in result:
+    #     print(user)
+    #
+    # # Update data
+    # collection.update_one({"_id":0}, {"$set": {"age": 31, "category": "human"}})
+    # # Find one data
+    # result = collection.find_one({"_id":0})
+    # print('Find one data: ', result)
+    #
+    # # Insert one data
+    # collection.insert_one(doc_4)
+    # collection.insert_one(doc_5)
+    # # Find one data
+    # result = collection.find({"date":"2017-12-19"})
+    # print('Find all data: ')
+    # for keyValue in result:
+    #     print(keyValue)
 
 
-def deleteCollection(collection):
-    # [!!!DANGEROUS ACTION!!!]
-    # Delete all data for testing purpose
-    collection.delete_many({})
+    def deleteCollection(self, collection):
+        # [!!!DANGEROUS ACTION!!!]
+        # Delete all data for testing purpose
+        collection.delete_many({})
 
