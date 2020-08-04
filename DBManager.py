@@ -46,13 +46,20 @@ def insert(jsonObject):
         db = connectDatabase("TradingData")
 
     collection = db["SH000001"]
-
+    
+    for i in range(len(jsonObject)):
+        val = jsonObject[str(i)]
+        print(type(val))
+        collection.insert_one(val)
+    return
+    
+    
     # [!!!DANGEROUS ACTION!!!]
     # Delete all data for testing purpose
-    # deleteCollection(collection)
+    #deleteCollection(collection)
 
     # test insert one data
-    return collection.insert_one(doc_1)
+    #return collection.insert_one(doc_1)
 
 
 def find(collection):
@@ -88,3 +95,8 @@ def deleteCollection(collection):
     # Delete all data for testing purpose
     collection.delete_many({})
 
+def delete():
+    # [!!!DANGEROUS ACTION!!!]
+    # Delete all data for testing purpose
+    collection = db["SH000001"]
+    collection.delete_many({})

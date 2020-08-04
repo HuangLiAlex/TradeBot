@@ -17,3 +17,4 @@ jsonObject = Parser.parseCNSTK(rawData)
 error = DBManager.insert(jsonObject)
 print(error)
 
+
