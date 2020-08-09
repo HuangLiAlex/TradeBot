@@ -14,7 +14,7 @@ today = date.today()
 today = today.strftime("%Y%m%d")
 
 # Get data thu api
-rawData = APIManager.getData(CNSTK, 'daily', '000001.SZ', '19901219', today)
+rawData = APIManager.getData(CNSTK, 'daily', '000001.SZ', '20200101', today)
 
 # Parse string to json object
 jsonObject = Parser.parseCNSTK(rawData)

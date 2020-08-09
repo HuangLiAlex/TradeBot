@@ -42,76 +42,40 @@ class DBManager:
         db = self.getDB("TradingData") # TBD: db name change to stock code. eg.SH000001
         collection = db["SH000001"] # TBD: change collecton name to period. eg.daily, weekly, monthly
 
-        for i in range(len(jsonObject)):
-            val = jsonObject[str(i)]
-            collection.insert_one(val)
-        return
-    
-    def insert_One(self, jsonObject):
-        db = self.getDB("TradingData") # TBD: db name change to stock code. eg.SH000001
-        collection = db["SH000001"] # TBD: change collecton name to period. eg.daily, weekly, monthly
+        # [!!!DANGEROUS ACTION!!!]
+        # Delete all data for testing purpose
+        self.deleteCollection(collection)
 
-        collection.insert_one(jsonObject)
-        return
+        # test insert one data
+        return collection.insert_one(doc_1)
 
-    def find(self, code):
-        db = self.getDB('TradingData')
-        collection = db['SH000001']
-        
-        find_object = collection.find({'ts_code': code}) # Find the records with ts_code
-        find_object = list(find_object) # Change to list format
-        
-        find_NewDict = {} # Assign key value to find_object, key value = trade_date
-        for i in range(len(find_object)):
-            Dict = {find_object[i].get('trade_date'): find_object[i]}
-            find_NewDict.update(Dict)
-        
-        find_NewDict = json.dumps(find_NewDict, default = str)
-        #print(find_object)
-        return find_NewDict
-        #return collection.find_one({"_id": 0})
 
-        # # Insert multiple data
-        # collection.insert_many([doc_2, doc_3])
-        # # Find all data
-        # result = collection.find({})
-        # print('Find all data: ')
-        # for user in result:
-        #     print(user)
-        #
-        # # Update data
-        # collection.update_one({"_id":0}, {"$set": {"age": 31, "category": "human"}})
-        # # Find one data
-        # result = collection.find_one({"_id":0})
-        # print('Find one data: ', result)
-        #
-        # # Insert one data
-        # collection.insert_one(doc_4)
-        # collection.insert_one(doc_5)
-        # # Find one data
-        # result = collection.find({"date":"2017-12-19"})
-        # print('Find all data: ')
-        # for keyValue in result:
-        #     print(keyValue)
-    
-    def find_TimeRange(self, code, start_date, end_date): # str
-        db = self.getDB('TradingData')
-        collection = db['SH000001']
-        
-        find_object = collection.find({
-                                        'ts_code': code,
-                                        'trade_date': {"$gte": start_date, "$lte": end_date}
-                                        }) # Find the records with ts_code
-        find_object = list(find_object) # Change to list format
-        
-        find_NewDict = {} # Assign key value to find_object, key value = trade_date
-        for i in range(len(find_object)):
-             Dict = {find_object[i].get('trade_date'): find_object[i]}
-             find_NewDict.update(Dict)
-        
-        find_NewDict = json.dumps(find_NewDict, default = str)
-        # #print(find_object)
-        return find_NewDict
+    def find(self, collection):
+        # test find one data
+        return collection.find_one({"_id": 0})
+
+    # # Insert multiple data
+    # collection.insert_many([doc_2, doc_3])
+    # # Find all data
+    # result = collection.find({})
+    # print('Find all data: ')
+    # for user in result:
+    #     print(user)
+    #
+    # # Update data
+    # collection.update_one({"_id":0}, {"$set": {"age": 31, "category": "human"}})
+    # # Find one data
+    # result = collection.find_one({"_id":0})
+    # print('Find one data: ', result)
+    #
+    # # Insert one data
+    # collection.insert_one(doc_4)
+    # collection.insert_one(doc_5)
+    # # Find one data
+    # result = collection.find({"date":"2017-12-19"})
+    # print('Find all data: ')
+    # for keyValue in result:
+    #     print(keyValue)
 
 
     def deleteCollection(self, collection):
@@ -119,8 +83,3 @@ class DBManager:
         # Delete all data for testing purpose
         collection.delete_many({})
 
-def delete():
-    # [!!!DANGEROUS ACTION!!!]
-    # Delete all data for testing purpose
-    collection = db["SH000001"]
-    collection.delete_many({})
