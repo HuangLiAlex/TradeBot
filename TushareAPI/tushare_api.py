@@ -2,13 +2,19 @@ import tushare as ts
 import json
 import time
 
+json_file = ''
+pro = []
 
-def connectServer():
+
+def connect_server():
     global json_file, pro
     with open('key.json', 'r') as json_file:
         data = json.load(json_file)
     token = data.get('token')
-    return ts.pro_api(token)
+    pro = ts.pro_api(token)
+    if pro:
+        print("Connected to tushare api server.")
+    return pro
 
 
 # def getData(freq, stkCode, startTime, endTime):
@@ -17,27 +23,39 @@ def connectServer():
 #     return pro.query(freq, ts_code=stkCode, start_date=startTime, end_date=endTime)
 
 
-def getData(freq, stkCode, startDate, endDate):
-    pro = connectServer()
+def get_data(stk_code, freq, start_time, end_time):
+    if not pro:
+        connect_server()
+
+    # step 1: get trade calendar
     df = pro.trade_cal(exchange='SSE', is_open='1',
-                       start_date=startDate,
-                       end_date=endDate,
+                       start_date=start_time,
+                       end_date=end_time,
                        fields='cal_date')
 
+    json_object = {}
+    # step 2: fetch daily data
     for date in df['cal_date'].values:
-        df = get_daily(stkCode, date)
+        df = get_daily(stk_code, date)
+        if df.empty:
+            print(date, "fail")
+            break
+        else:
+            print(date, "get")
+            value = json.loads(df.to_json(orient='records', lines=True))
+            json_object[date] = value
 
-    return df
+    return json_object
 
 
 def get_daily(ts_code='', trade_date='', start_date='', end_date=''):
-    pro = connectServer()
+    if not pro:
+        connect_server()
+
     for _ in range(3):
         try:
             if trade_date:
-                print(trade_date)
                 df = pro.daily(ts_code=ts_code, trade_date=trade_date)
-                print(df)
             else:
                 df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
         except Exception as e:

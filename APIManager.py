@@ -2,14 +2,14 @@ from TushareAPI import tushare_api
 from BinanceAPI import binance_api
 
 
-def getData(category, freq, stkCode, startTime, endTime):
+def get_data(category, stk_code, freq, start_time, end_time):
     data = []
     if category == "ChinaStock":
-        data = tushare_api.getData(freq, stkCode, startTime, endTime)
+        data = tushare_api.get_data(stk_code, freq, start_time, end_time)
     if category == "CryptoCurrency":
-        data = binance_api.getData()
+        data = binance_api.get_data()
 
-    if data.size > 0:
+    if len(data) > 0:
         return data
     else:
         return False

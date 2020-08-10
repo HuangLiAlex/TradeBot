@@ -14,9 +14,9 @@ doc_5 = {"date": "2017-12-14", "open": 3302.93, "close": 3292.44, "high": 3309.5
 
 class DBManager:
     def __init__(self):
-        self.client = self.initDB()
+        self.client = self.init_db()
 
-    def initDB(self):
+    def init_db(self):
         with open('key.json', 'r') as json_file:
             data = json.load(json_file)
         url = data.get('DB_URL')
@@ -24,9 +24,14 @@ class DBManager:
         # Connect to MongoDB
         return MongoClient(url)
 
-    def getDB(self, databaseName):
+    def get_db(self, db_name):
         # Get the database to access
-        return self.client[databaseName]
+        return self.client[db_name]
+
+    def get_collection(self, collection_name, db_name):
+        db = self.get_db(db_name)
+        collection = db[collection_name]
+        return collection
 
     """
     # Input: a Json object contains several Json objects
@@ -38,48 +43,56 @@ class DBManager:
     #
     # Output: boolean: True or False
     """
-    def insert(self, jsonObject):
-        db = self.getDB("TradingData") # TBD: db name change to stock code. eg.SH000001
-        collection = db["SH000001"] # TBD: change collecton name to period. eg.daily, weekly, monthly
+    def insert(self, db_name, collection_name, json_object):
+        collection = self.get_collection(collection_name, db_name)
 
-        # [!!!DANGEROUS ACTION!!!]
-        # Delete all data for testing purpose
-        self.deleteCollection(collection)
+        try:
+            for key, value in json_object.items():
+                value["_id"] = key
+                result = collection.insert_one(value)
+                print(key, result)
+        except Exception as ex:
+            print(ex)
 
-        # test insert one data
-        return collection.insert_one(doc_1)
+    # def insert_one(self, db_name, collection_name, json_object):
+    #     collection = self.get_collection(collection_name, db_name)
+    #     collection.insert_one(json_object)
+
+    def find(self, db_name, collection_name):
+        collection = self.get_collection(collection_name, db_name)
+
+        find_object = collection.find({'ts_code:': collection_name})  # Find the records with ts_code
+        find_object = list(find_object)  # Change to list format
+
+        find_new_dict = {}  # Assign key value to find_object, key value = trade_date
+        for i in range(len(find_object)):
+            result = {find_object[i].get('trade_date'): find_object[i]}
+            find_new_dict.update(result)
+
+        find_new_dict = json.dumps(find_new_dict, default=str)
+        return find_new_dict
+
+    def find_time_range(self, db_name, collection_name, start_date, end_date):  # str
+        collection = self.get_collection(collection_name, db_name)
+
+        find_object = collection.find({
+            'ts_code': collection_name,
+            'trade_date': {"$gte": start_date, "$lte": end_date}
+        })  # Find the records with ts_code
+        find_object = list(find_object)  # Change to list format
+
+        find_new_dict = {}  # Assign key value to find_object, key value = trade_date
+        for i in range(len(find_object)):
+            result = {find_object[i].get('trade_date'): find_object[i]}
+            find_new_dict.update(result)
+
+        find_new_dict = json.dumps(find_new_dict, default=str)
+        # print(find_object)
+        return find_new_dict
 
 
-    def find(self, collection):
-        # test find one data
-        return collection.find_one({"_id": 0})
-
-    # # Insert multiple data
-    # collection.insert_many([doc_2, doc_3])
-    # # Find all data
-    # result = collection.find({})
-    # print('Find all data: ')
-    # for user in result:
-    #     print(user)
-    #
-    # # Update data
-    # collection.update_one({"_id":0}, {"$set": {"age": 31, "category": "human"}})
-    # # Find one data
-    # result = collection.find_one({"_id":0})
-    # print('Find one data: ', result)
-    #
-    # # Insert one data
-    # collection.insert_one(doc_4)
-    # collection.insert_one(doc_5)
-    # # Find one data
-    # result = collection.find({"date":"2017-12-19"})
-    # print('Find all data: ')
-    # for keyValue in result:
-    #     print(keyValue)
-
-
-    def deleteCollection(self, collection):
-        # [!!!DANGEROUS ACTION!!!]
-        # Delete all data for testing purpose
-        collection.delete_many({})
+    # def delete_collection(self, collection):
+    #     # [!!!DANGEROUS ACTION!!!]
+    #     # Delete all data for testing purpose
+    #     collection.delete_many({})
 
