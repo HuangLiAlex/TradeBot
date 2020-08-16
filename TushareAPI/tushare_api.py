@@ -23,7 +23,8 @@ def connect_server():
 #     return pro.query(freq, ts_code=stkCode, start_date=startTime, end_date=endTime)
 
 
-def get_data(stk_code, freq, start_time, end_time):
+def get_data(stk_code, freq, start_time, end_time, q):
+    global pro
     if not pro:
         connect_server()
 
@@ -33,22 +34,21 @@ def get_data(stk_code, freq, start_time, end_time):
                        end_date=end_time,
                        fields='cal_date')
 
-    json_object = {}
     # step 2: fetch daily data
     for date in df['cal_date'].values:
         df = get_daily(stk_code, date)
         if df.empty:
             print(date, "fail")
-            break
+            pass
         else:
             print(date, "get")
             value = json.loads(df.to_json(orient='records', lines=True))
-            json_object[date] = value
-
-    return json_object
+            data = {date: value}
+            q.put(data)
 
 
 def get_daily(ts_code='', trade_date='', start_date='', end_date=''):
+    global pro
     if not pro:
         connect_server()
 
